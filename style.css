@@ -72,3 +72,11 @@ h1 {
 #resetBtn:active {
   transform: scale(0.95);
 }
+
+.status {
+  display: flex;
+  gap: 60px;
+  margin-bottom: 30px;
+  font-size: 25px;
+  font-weight: bold;
+}

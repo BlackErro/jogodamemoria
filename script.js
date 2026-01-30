@@ -1,33 +1,50 @@
+// ⏱️ Tempo e tentativas
+let time = 0;
+let moves = 0;
+let timerInterval = null;
+
+const timeEl = document.getElementById("time");
+const movesEl = document.getElementById("moves");
+
+// Emojis
 const emojis = ['😀', '😂', '😍', '😎', '😭', '🔥', '🤖', '👻'];
-const cards = [...emojis, ...emojis]; // pares
+const cards = [...emojis, ...emojis];
 
 let firstCard = null;
 let secondCard = null;
 let lockBoard = false;
 
-// Embaralhar cartas
-cards.sort(() => Math.random() - 0.5);
-
 const board = document.getElementById("gameBoard");
+const resetBtn = document.getElementById("resetBtn");
 
-// Criar cartas
-cards.forEach(emoji => {
-  const card = document.createElement("div");
-  card.classList.add("card");
+// ▶️ Inicialização
+initGame();
 
-  const span = document.createElement("span");
-  span.textContent = emoji;
+// ---------------- FUNÇÕES ----------------
 
-  card.appendChild(span);
-  board.appendChild(card);
+function initGame() {
+  board.innerHTML = "";
+  cards.sort(() => Math.random() - 0.5);
 
-  card.addEventListener("click", () => flipCard(card));
-});
+  cards.forEach(emoji => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+
+    const span = document.createElement("span");
+    span.textContent = emoji;
+
+    card.appendChild(span);
+    board.appendChild(card);
+
+    card.addEventListener("click", () => flipCard(card));
+  });
+}
 
 function flipCard(card) {
   if (lockBoard) return;
   if (card === firstCard) return;
 
+  startTimer();
   card.classList.add("flipped");
 
   if (!firstCard) {
@@ -40,8 +57,10 @@ function flipCard(card) {
 }
 
 function checkMatch() {
-  const isMatch =
-    firstCard.innerText === secondCard.innerText;
+  moves++;
+  movesEl.textContent = moves;
+
+  const isMatch = firstCard.innerText === secondCard.innerText;
 
   if (isMatch) {
     firstCard.classList.add("matched");
@@ -66,36 +85,39 @@ function resetTurn() {
 function checkWin() {
   const matchedCards = document.querySelectorAll(".matched");
   if (matchedCards.length === cards.length) {
+    clearInterval(timerInterval);
     setTimeout(() => {
-      alert("🎉 Parabéns! Você venceu!");
+      alert(`🎉 Você venceu em ${time}s com ${moves} tentativas!`);
     }, 300);
   }
 }
 
-const resetBtn = document.getElementById("resetBtn");
-
+// 🔄 Reset do jogo
 function resetGame() {
-  board.innerHTML = "";
+  time = 0;
+  moves = 0;
+  timeEl.textContent = 0;
+  movesEl.textContent = 0;
+
+  clearInterval(timerInterval);
+  timerInterval = null;
+
   firstCard = null;
   secondCard = null;
   lockBoard = false;
 
-  // Embaralhar novamente
-  cards.sort(() => Math.random() - 0.5);
-
-  // Recriar as cartas
-  cards.forEach(emoji => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-
-    const span = document.createElement("span");
-    span.textContent = emoji;
-
-    card.appendChild(span);
-    board.appendChild(card);
-
-    card.addEventListener("click", () => flipCard(card));
-  });
+  initGame();
 }
 
 resetBtn.addEventListener("click", resetGame);
+
+// ⏱️ Timer
+function startTimer() {
+  if (timerInterval) return;
+
+  timerInterval = setInterval(() => {
+    time++;
+    timeEl.textContent = time;
+  }, 1000);
+}
+
